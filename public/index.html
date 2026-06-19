@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicação To-Do</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 1em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .input-group button:hover {
+            transform: translateY(-2px);
+        }
+
+        .input-group button:active {
+            transform: translateY(0);
+        }
+
+        .tarefas-list {
+            list-style: none;
+        }
+
+        .tarefa-item {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .tarefa-item:hover {
+            background: #f0f0f0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .tarefa-item.concluida {
+            opacity: 0.6;
+        }
+
+        .tarefa-item.concluida .tarefa-texto {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .tarefa-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .tarefa-texto {
+            flex: 1;
+            word-break: break-word;
+            color: #333;
+        }
+
+        .tarefa-delete {
+            padding: 6px 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+
+        .tarefa-delete:hover {
+            background: #ee5a52;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            background: #f0f0f0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ To-Do App</h1>
+            <p>Gerencie suas tarefas com facilidade</p>
+        </div>
+
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="novaTarefa" 
+                placeholder="Adicione uma nova tarefa..."
+                autocomplete="off"
+            >
+            <button onclick="adicionarTarefa()">Adicionar</button>
+        </div>
+
+        <ul class="tarefas-list" id="tarefasList"></ul>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            Nenhuma tarefa cadastrada. Comece a adicionar tarefas agora! 🚀
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="totalTarefas">0</div>
+                <div class="stat-label">Total de Tarefas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="tarefasConcluidas">0</div>
+                <div class="stat-label">Concluídas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="tarefasPendentes">0</div>
+                <div class="stat-label">Pendentes</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Carregar tarefas ao abrir a página
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarTarefas();
+            // Permitir adicionar tarefa com Enter
+            document.getElementById('novaTarefa').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    adicionarTarefa();
+                }
+            });
+        });
+
+        async function carregarTarefas() {
+            try {
+                const response = await fetch('/api/tarefas');
+                const tarefas = await response.json();
+                exibirTarefas(tarefas);
+                atualizarStats(tarefas);
+            } catch (error) {
+                console.error('Erro ao carregar tarefas:', error);
+            }
+        }
+
+        async function adicionarTarefa() {
+            const input = document.getElementById('novaTarefa');
+            const titulo = input.value.trim();
+
+            if (!titulo) {
+                alert('Por favor, digite uma tarefa!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/tarefas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ titulo }),
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    carregarTarefas();
+                } else {
+                    alert('Erro ao adicionar tarefa');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar tarefa:', error);
+            }
+        }
+
+        async function toggleTarefa(id, concluida) {
+            try {
+                const response = await fetch(`/api/tarefas/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ concluida: !concluida }),
+                });
+
+                if (response.ok) {
+                    carregarTarefas();
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar tarefa:', error);
+            }
+        }
+
+        async function deletarTarefa(id) {
+            if (confirm('Tem certeza que deseja deletar esta tarefa?')) {
+                try {
+                    const response = await fetch(`/api/tarefas/${id}`, {
+                        method: 'DELETE',
+                    });
+
+                    if (response.ok) {
+                        carregarTarefas();
+                    }
+                } catch (error) {
+                    console.error('Erro ao deletar tarefa:', error);
+                }
+            }
+        }
+
+        function exibirTarefas(tarefas) {
+            const list = document.getElementById('tarefasList');
+            const emptyState = document.getElementById('emptyState');
+            
+            list.innerHTML = '';
+
+            if (tarefas.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            tarefas.forEach((tarefa) => {
+                const li = document.createElement('li');
+                li.className = `tarefa-item ${tarefa.concluida ? 'concluida' : ''}`;
+                
+                li.innerHTML = `
+                    <input 
+                        type="checkbox" 
+                        class="tarefa-checkbox" 
+                        ${tarefa.concluida ? 'checked' : ''} 
+                        onchange="toggleTarefa(${tarefa.id}, ${tarefa.concluida})"
+                    >
+                    <span class="tarefa-texto">${escapeHtml(tarefa.titulo)}</span>
+                    <button class="tarefa-delete" onclick="deletarTarefa(${tarefa.id})">Deletar</button>
+                `;
+
+                list.appendChild(li);
+            });
+        }
+
+        function atualizarStats(tarefas) {
+            const total = tarefas.length;
+            const concluidas = tarefas.filter(t => t.concluida).length;
+            const pendentes = total - concluidas;
+
+            document.getElementById('totalTarefas').textContent = total;
+            document.getElementById('tarefasConcluidas').textContent = concluidas;
+            document.getElementById('tarefasPendentes').textContent = pendentes;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

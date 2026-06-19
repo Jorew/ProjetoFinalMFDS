@@ -1,8 +1,16 @@
 const fs = require("fs");
 const path = require("path");
+const express = require("express");
 
+const app = express();
+const PORT = process.env.PORT || 3000;
 const tarefasPath = path.join(__dirname, "..", "dados", "tarefas.json");
 
+// Middleware
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+// Funções de gerenciamento de tarefas
 function carregarTarefas() {
   try {
     const data = fs.readFileSync(tarefasPath, "utf8");
@@ -41,21 +49,61 @@ function listarTarefas() {
   });
 }
 
-const args = process.argv.slice(2);
-const comando = args[0];
+// API Endpoints
+app.get("/api/tarefas", (req, res) => {
+  const tarefas = carregarTarefas();
+  res.json(tarefas);
+});
 
-if (comando === "adicionar") {
-  const titulo = args.slice(1).join(" ");
+app.post("/api/tarefas", (req, res) => {
+  const { titulo } = req.body;
   if (!titulo) {
-    console.log("Use: node src/app.js adicionar \"Título da tarefa\"");
-    process.exit(1);
+    return res.status(400).json({ erro: "Título é obrigatório" });
   }
   const tarefa = adicionarTarefa(titulo);
-  console.log("Tarefa adicionada:", tarefa);
-} else {
-  listarTarefas();
-  console.log("\nPara adicionar uma tarefa, execute: node src/app.js adicionar \"Título da tarefa\"");
-}
+  res.status(201).json(tarefa);
+});
+
+app.put("/api/tarefas/:id", (req, res) => {
+  const { id } = req.params;
+  const { titulo, concluida } = req.body;
+  const tarefas = carregarTarefas();
+  const tarefa = tarefas.find((t) => t.id === parseInt(id));
+
+  if (!tarefa) {
+    return res.status(404).json({ erro: "Tarefa não encontrada" });
+  }
+
+  if (titulo !== undefined) tarefa.titulo = titulo;
+  if (concluida !== undefined) tarefa.concluida = concluida;
+
+  salvarTarefas(tarefas);
+  res.json(tarefa);
+});
+
+app.delete("/api/tarefas/:id", (req, res) => {
+  const { id } = req.params;
+  const tarefas = carregarTarefas();
+  const index = tarefas.findIndex((t) => t.id === parseInt(id));
+
+  if (index === -1) {
+    return res.status(404).json({ erro: "Tarefa não encontrada" });
+  }
+
+  const tarefaRemovida = tarefas.splice(index, 1);
+  salvarTarefas(tarefas);
+  res.json(tarefaRemovida[0]);
+});
+
+// Rota raiz
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
+
+// Iniciar servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
 
 module.exports = {
   carregarTarefas,
