@@ -52,4 +52,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ toLower(github.repository_owner) }}/projetofinalmfds:latest
-          ghcr.io/${{ toLower(github.repository_owner) }}/projetofinalmfds:${{ github.
+            ghcr.io/${{ toLower(github.repository_owner) }}/projetofinalmfds:${{ github.sha }}
