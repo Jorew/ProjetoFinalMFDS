@@ -51,5 +51,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/projetofinalmfds:latest
-            ghcr.io/${{ github.repository_owner }}/projetofinalmfds:${{ github.sha }}
+            ghcr.io/${{ toLower(github.repository_owner) }}/projetofinalmfds:latest
+          ghcr.io/${{ toLower(github.repository_owner) }}/projetofinalmfds:${{ github.
