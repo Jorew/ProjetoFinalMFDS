@@ -1,0 +1,19 @@
+{
+  "name": "todo-devops",
+  "version": "1.0.0",
+  "description": "Aplicação To-Do simples para checkpoint DevOps",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "build": "echo \"build step\"",
+    "test": "jest --runInBand"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2"
+  }
+}
